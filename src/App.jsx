@@ -1,28 +1,49 @@
-import { useState, useEffect } from 'react'
-import JokeDisplay from './components/JokeDisplay'
-import FetchButton from './components/FetchButton'
+import { useState, useEffect } from "react";
+import JokeDisplay from "./components/JokeDisplay";
+import FetchButton from "./components/FetchButton";
 
 function App() {
   // Step 1: Create state variables for `joke` and `loading`
-
-  // Step 2: Use `useEffect` to call a function that fetches a joke when the component mounts
+  const [joke, setJoke] = useState("");       // store the joke text
+  const [loading, setLoading] = useState(false); // shows "Loading..."
+  const [error, setError] = useState(null);   // optional: holds any error message
 
   // Step 3: Define a function that fetches a programming joke from an API
-  // - Start by setting `loading` to true
-  // - Fetch a joke from "https://v2.jokeapi.dev/joke/Programming?type=single"
-  // - Update the `joke` state with the fetched joke
-  // - Set `loading` to false once the joke is loaded
-  // - Handle any errors in the `.catch` block
+  const fetchJoke = () => {
+    setLoading(true);
+    setError(null);
+    fetch("https://v2.jokeapi.dev/joke/Programming?type=single")
+      .then((res) => res.json())
+      .then((data) => {
+        setJoke(data.joke);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching joke:", err);
+        setError("Failed to fetch a joke.");
+        setLoading(false);
+      });
+  };
+
+  // Step 2: Fetch a joke when the component mounts
+  useEffect(() => {
+    fetchJoke();
+  }, []);
 
   return (
-    <div className="app">
+    <div className="app" style={{ fontFamily: "sans-serif", padding: 20 }}>
       <h1>Programming Jokes</h1>
+
       {/* Step 4: Pass the necessary props to JokeDisplay */}
-      <JokeDisplay />
+      <JokeDisplay loading={loading} joke={joke} />
+
       {/* Step 5: Pass the function to FetchButton so it can fetch a new joke on click */}
-      <FetchButton />
+      <FetchButton fetchJoke={fetchJoke} />
+
+      {error && <p style={{ color: "crimson" }}>{error}</p>}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
+
